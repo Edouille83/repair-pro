@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/app/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, getClientIP } from "@/app/lib/rateLimit";
 import { publicTrackingSchema } from "@/app/lib/validation";
 
-const prisma = new PrismaClient();
+// Use the singleton instance of prisma from @/app/lib/prisma
 
 export async function POST(request: NextRequest) {
   const clientIP = getClientIP(request);

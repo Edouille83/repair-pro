@@ -3,22 +3,23 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Client {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String   @unique
-  email     String?
-  address   String?
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  repairs   Repair[]
-  repairsCount Int    @default(0)
-  totalSpent Float   @default(0)
+  id           Int      @id @default(autoincrement())
+  name         String
+  phone        String   @unique
+  email        String?
+  address      String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  repairsCount Int      @default(0)
+  totalSpent   Float    @default(0)
+  repairs      Repair[]
 }
 
 model Technician {
@@ -44,55 +45,54 @@ model Category {
 }
 
 model Repair {
-  id           Int         @id @default(autoincrement())
-  invoiceRef   String      @unique @default(cuid())
-  client       Client      @relation(fields: [clientId], references: [id])
-  clientId     Int
-  technician   Technician? @relation(fields: [technicianId], references: [id])
-  technicianId Int?
-  category     Category?   @relation(fields: [categoryId], references: [id])
-  categoryId   Int?
-  deviceType   String
-  brandModel   String
-  serialNumber String?
-  issue        String
-  diagnosis    String?
-  solution     String?
-  status       String      @default("Diagnostic")
-  priority     String      @default("Normale")
-  preChecklist String?
-  photos       String?
-  signature    String?
-  estimatedCost Float?
-  finalCost    Float?
-  warrantyMonths Int       @default(0)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  completedAt  DateTime?
-  retrievedAt  DateTime?
-  reminderSent Boolean     @default(false)
+  id              Int         @id @default(autoincrement())
+  invoiceRef      String      @unique @default(cuid())
+  clientId        Int
+  technicianId    Int?
+  categoryId      Int?
+  deviceType      String
+  brandModel      String
+  serialNumber    String?
+  issue           String
+  diagnosis       String?
+  solution        String?
+  status          String      @default("Diagnostic")
+  priority        String      @default("Normale")
+  preChecklist    String?
+  photos          String?
+  signature       String?
+  estimatedCost   Float?
+  finalCost       Float?
+  warrantyMonths  Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  completedAt     DateTime?
+  retrievedAt     DateTime?
+  reminderSent    Boolean     @default(false)
   conditionReport String?
-  invoices     Invoice[]
-  quotes       Quote[]
-  warranty     Warranty?
+  invoices        Invoice[]
+  quotes          Quote[]
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  client          Client      @relation(fields: [clientId], references: [id])
+  technician      Technician? @relation(fields: [technicianId], references: [id])
+  warranty        Warranty?
 }
 
 model Quote {
-  id          Int      @id @default(autoincrement())
-  repair      Repair   @relation(fields: [repairId], references: [id])
+  id          Int       @id @default(autoincrement())
   repairId    Int
   label       String
   description String?
   amount      Float
-  status      String   @default("En attente")
+  status      String    @default("En attente")
   validUntil  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  repair      Repair    @relation(fields: [repairId], references: [id])
 }
 
 model Invoice {
   id          Int       @id @default(autoincrement())
-  repair      Repair    @relation(fields: [repairId], references: [id])
   repairId    Int
   laborLabel  String    @default("Main d'œuvre")
   laborAmount Float     @default(0)
@@ -104,63 +104,64 @@ model Invoice {
   totalTtc    Float     @default(0)
   notes       String?
   createdAt   DateTime  @default(now())
+  repair      Repair    @relation(fields: [repairId], references: [id])
   payments    Payment[]
 }
 
 model Payment {
   id        Int      @id @default(autoincrement())
-  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
   invoiceId Int
   amount    Float
   method    String
   note      String?
   createdAt DateTime @default(now())
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
 }
 
 model Part {
-  id          Int      @id @default(autoincrement())
-  reference   String   @unique
-  name        String
-  description String?
-  category    String?
-  purchasePrice Float  @default(0)
-  sellingPrice Float  @default(0)
-  stock       Int      @default(0)
-  minStock    Int      @default(5)
-  supplier    String?
-  location    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  reference     String   @unique
+  name          String
+  description   String?
+  category      String?
+  purchasePrice Float    @default(0)
+  sellingPrice  Float    @default(0)
+  stock         Int      @default(0)
+  minStock      Int      @default(5)
+  supplier      String?
+  location      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Warranty {
-  id           Int      @id @default(autoincrement())
-  repair       Repair   @relation(fields: [repairId], references: [id])
-  repairId     Int      @unique
-  warrantyEnd  DateTime
-  terms        String?
-  status       String   @default("Active")
-  claims       Int      @default(0)
-  notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  repairId    Int      @unique
+  warrantyEnd DateTime
+  terms       String?
+  status      String   @default("Active")
+  claims      Int      @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  repair      Repair   @relation(fields: [repairId], references: [id])
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   type      String
   title     String
   message   String
   repairId  Int?
   clientId  Int?
-  read      Boolean  @default(false)
+  read      Boolean   @default(false)
   sentAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model Settings {
-  id           Int     @id @default(autoincrement())
-  key          String  @unique
-  value        String
-  updatedAt    DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
