@@ -125,6 +125,8 @@ export async function createRepairAction(data: {
     brandModel: updatedRepair.brandModel,
     serialNumber: updatedRepair.serialNumber,
     issue: updatedRepair.issue,
+    diagnosis: updatedRepair.diagnosis,
+    solution: updatedRepair.solution,
     status: updatedRepair.status as any,
     priority: updatedRepair.priority,
     technicianId: updatedRepair.technicianId,
@@ -132,8 +134,15 @@ export async function createRepairAction(data: {
     categoryId: updatedRepair.categoryId,
     categoryName: updatedRepair.category?.name,
     estimatedCost: updatedRepair.estimatedCost,
+    finalCost: updatedRepair.finalCost,
     warrantyMonths: updatedRepair.warrantyMonths,
+    preChecklist: updatedRepair.preChecklist,
+    photos: updatedRepair.photos,
+    signature: updatedRepair.signature,
+    conditionReport: updatedRepair.conditionReport,
     reminderSent: updatedRepair.reminderSent,
+    completedAt: updatedRepair.completedAt?.toLocaleString("fr-FR"),
+    retrievedAt: updatedRepair.retrievedAt?.toLocaleString("fr-FR"),
     createdAt: updatedRepair.createdAt.toLocaleString("fr-FR"),
   };
 }
@@ -712,30 +721,30 @@ export async function getStatsAction() {
       _count: true,
     }),
     prisma.$queryRaw<{month: string; count: bigint}[]>`
-      SELECT strftime('%Y-%m', createdAt) as month, COUNT(*) as count 
-      FROM Repair 
+      SELECT TO_CHAR(createdAt, 'YYYY-MM') as month, COUNT(*)::bigint as count 
+      FROM "Repair" 
       GROUP BY month 
       ORDER BY month DESC 
       LIMIT 12
     `,
     prisma.$queryRaw<{month: string; total: number}[]>`
-      SELECT strftime('%Y-%m', createdAt) as month, SUM(totalTtc) as total 
-      FROM Invoice 
+      SELECT TO_CHAR(createdAt, 'YYYY-MM') as month, SUM("totalTtc")::float as total 
+      FROM "Invoice" 
       GROUP BY month 
       ORDER BY month DESC 
       LIMIT 12
     `,
     prisma.$queryRaw<{deviceType: string; brandModel: string; count: bigint}[]>`
-      SELECT deviceType, brandModel, COUNT(*) as count 
-      FROM Repair 
-      GROUP BY deviceType, brandModel 
+      SELECT "deviceType", "brandModel", COUNT(*)::bigint as count 
+      FROM "Repair" 
+      GROUP BY "deviceType", "brandModel" 
       ORDER BY count DESC 
       LIMIT 10
     `,
     prisma.$queryRaw<{id: number; name: string; stock: number; minStock: number; sellingPrice: number}[]>`
-      SELECT id, name, stock, minStock, sellingPrice 
-      FROM Part 
-      WHERE stock <= minStock 
+      SELECT id, name, stock, "minStock", "sellingPrice" 
+      FROM "Part" 
+      WHERE stock <= "minStock" 
       ORDER BY stock ASC
     `,
     prisma.warranty.count({ where: { status: "Active", warrantyEnd: { gt: new Date() } } }),
