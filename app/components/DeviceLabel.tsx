@@ -99,7 +99,7 @@ export const DeviceLabel = forwardRef<HTMLDivElement, DeviceLabelProps>(({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-indigo-600 text-white px-2 py-1 rounded font-black text-xs">
-              {invoiceRef.split("-")[2]}
+              {invoiceRef.includes("-") ? invoiceRef.split("-")[2] : invoiceRef.slice(-4).toUpperCase()}
             </div>
             <div>
               <p className="font-bold text-slate-800 text-xs">{clientName}</p>

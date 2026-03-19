@@ -548,6 +548,30 @@ export default function RepairsPage() {
 
       {/* Print Area - Hidden */}
       <div className="hidden">
+        {ticketToPrint && (
+          <div ref={ticketRef}>
+            <TicketPrint 
+              ticketData={{
+                id: ticketToPrint.id,
+                clientName: ticketToPrint.clientName,
+                phone: ticketToPrint.phone,
+                deviceType: ticketToPrint.deviceType,
+                brandModel: ticketToPrint.brandModel,
+                issue: ticketToPrint.issue,
+                invoiceRef: ticketToPrint.invoiceRef,
+                createdAt: ticketToPrint.createdAt,
+                status: ticketToPrint.status,
+              } as any}
+            />
+          </div>
+        )}
+        
+        {labelToPrint && (
+          <div ref={labelRef}>
+            <DeviceLabel {...labelToPrint} />
+          </div>
+        )}
+
         {conditionReport && (
           <div ref={reportRef} className="p-8 bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
             <div className="text-center mb-6 border-b-2 border-dashed border-slate-300 pb-4">
