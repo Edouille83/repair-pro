@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useStore, Invoice } from "../store/StoreProvider";
-import { ReceiptText, FileText, Search, PlusCircle, Printer } from "lucide-react";
+import { ReceiptText, FileText, Search, PlusCircle, Printer, Mail } from "lucide-react";
 import { useRef, useState as useReactState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { InvoicePrint } from "../components/InvoicePrint";
@@ -19,6 +19,10 @@ export default function InvoicesPage() {
   const [shopInfo, setShopInfo] = useState({ name: "Repair Pro", address: "", city: "", phone: "", siret: "", email: "" });
   
   const [printingInvoice, setPrintingInvoice] = useReactState<Invoice | null>(null);
+  const [emailInvoice, setEmailInvoice] = useReactState<Invoice | null>(null);
+  const [clientEmail, setClientEmail] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,6 +59,37 @@ export default function InvoicesPage() {
       return () => clearTimeout(timer);
     }
   }, [printingInvoice]);
+
+  const handleSendEmail = async () => {
+    if (!emailInvoice || !clientEmail) return;
+    setSendingEmail(true);
+    try {
+      const rep = records.find(r => r.id === emailInvoice.repairId);
+      const response = await fetch('/api/send-invoice-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: clientEmail,
+          invoice: emailInvoice,
+          clientName: rep?.clientName || 'Client',
+          deviceInfo: rep ? `${rep.deviceType} ${rep.brandModel}` : '',
+          shopInfo,
+        }),
+      });
+      if (response.ok) {
+        setEmailSent(true);
+        setTimeout(() => {
+          setEmailInvoice(null);
+          setEmailSent(false);
+          setClientEmail("");
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Error sending email:', err);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const totalHt = (Number(laborAmount) || 0) + (Number(partAmount) || 0);
   const totalVat = totalHt * ((Number(vatRate) || 0) / 100);
@@ -224,7 +259,15 @@ export default function InvoicesPage() {
                         <div className="text-slate-400 text-xs uppercase font-bold tracking-wider mb-1">Déjà payé</div>
                         <div className={`font-bold ${paid > 0 ? "text-emerald-600" : "text-slate-500"}`}>{euro(paid)}</div>
                       </div>
-                      <div className="flex justify-end items-center">
+                      <div className="flex justify-end items-center gap-2">
+                        <button
+                          onClick={() => setEmailInvoice(inv)}
+                          className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 border border-blue-200 text-blue-700 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
+                          title="Envoyer par Email"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                          Email
+                        </button>
                         <button
                           onClick={() => setPrintingInvoice(inv)}
                           className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
@@ -251,6 +294,65 @@ export default function InvoicesPage() {
           shopInfo={shopInfo}
         />
       </div>
+
+      {/* Email Modal */}
+      {emailInvoice && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Mail className="w-5 h-5 text-blue-600" />
+              Envoyer la facture par Email
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Email du client</label>
+                <input
+                  type="email"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                  placeholder="client@exemple.com"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 outline-none transition-all"
+                />
+              </div>
+              
+              <div className="bg-slate-50 p-4 rounded-xl">
+                <p className="text-sm text-slate-600 mb-2">Facture : <span className="font-bold">FAC-{emailInvoice.createdAt.slice(6,10)}{emailInvoice.createdAt.slice(3,5)}-{emailInvoice.id.toString().padStart(4, "0")}</span></p>
+                <p className="text-lg font-bold text-slate-900">Montant : {euro(emailInvoice.totalTtc)}</p>
+              </div>
+
+              {emailSent && (
+                <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-center font-semibold">
+                  Email envoyé avec succès !
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { setEmailInvoice(null); setClientEmail(""); setEmailSent(false); }}
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSendEmail}
+                disabled={!clientEmail || sendingEmail}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold rounded-xl transition-all flex justify-center items-center gap-2"
+              >
+                {sendingEmail ? (
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5" />
+                    Envoyer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
