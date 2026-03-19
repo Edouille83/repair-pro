@@ -1,11 +1,9 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "./lib/prisma";
 import { sendSMS } from "./lib/sms";
 import { sendEmail, formatRepairStatusEmail } from "./lib/email";
 import { onlineBookingSchema } from "./lib/validation";
-
-const prisma = new PrismaClient();
 
 // --- REPAIRS ---
 export async function getRepairsAction() {
