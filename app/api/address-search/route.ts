@@ -20,8 +20,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const viewbox = "5.6,43.9,6.8,43.0";
+    
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=8&countrycodes=fr,be,ch,lu,mc&addressdetails=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=8&countrycodes=fr&addressdetails=1&viewbox=${viewbox}&bounded=1`,
       {
         headers: {
           "Accept": "application/json",
