@@ -47,6 +47,15 @@ export default function InvoicesPage() {
     contentRef: printRef,
   });
 
+  useEffect(() => {
+    if (printingInvoice && printRef.current) {
+      const timer = setTimeout(() => {
+        handlePrint();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [printingInvoice]);
+
   const totalHt = (Number(laborAmount) || 0) + (Number(partAmount) || 0);
   const totalVat = totalHt * ((Number(vatRate) || 0) / 100);
   const totalTtc = totalHt + totalVat;
@@ -217,7 +226,7 @@ export default function InvoicesPage() {
                       </div>
                       <div className="flex justify-end items-center">
                         <button
-                          onClick={() => { setPrintingInvoice(inv); setTimeout(handlePrint, 100); }}
+                          onClick={() => setPrintingInvoice(inv)}
                           className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all flex items-center gap-2"
                           title="Générer PDF Facture"
                         >
@@ -240,7 +249,6 @@ export default function InvoicesPage() {
           invoice={printingInvoice} 
           repairDetails={records.find(r => r.id === printingInvoice?.repairId) || null}
           shopInfo={shopInfo}
-          autoPrint={!!printingInvoice}
         />
       </div>
     </div>

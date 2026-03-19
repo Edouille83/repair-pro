@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from "react";
+import React, { forwardRef } from "react";
 import { Invoice, IntakeRecord } from "../store/StoreProvider";
 
 type InvoicePrintProps = { 
@@ -6,11 +6,10 @@ type InvoicePrintProps = {
   repairDetails: IntakeRecord | null;
   clientInfo?: { name: string, phone: string, address?: string } | null;
   shopInfo?: { name: string; address: string; city: string; phone: string; siret: string; email: string };
-  autoPrint?: boolean;
 };
 
 export const InvoicePrint = forwardRef<HTMLDivElement, InvoicePrintProps>(
-  ({ invoice, repairDetails, clientInfo, shopInfo, autoPrint }, ref) => {
+  ({ invoice, repairDetails, clientInfo, shopInfo }, ref) => {
     const euro = (val: number) => val.toFixed(2).replace(".", ",") + " €";
     const shopName = shopInfo?.name || "Repair Pro";
     const shopAddress = shopInfo?.address || "";
@@ -18,15 +17,6 @@ export const InvoicePrint = forwardRef<HTMLDivElement, InvoicePrintProps>(
     const shopPhone = shopInfo?.phone || "";
     const shopSiret = shopInfo?.siret || "";
     const shopEmail = shopInfo?.email || "";
-
-    useEffect(() => {
-      if (autoPrint && typeof window !== 'undefined') {
-        const timer = setTimeout(() => {
-          window.print();
-        }, 300);
-        return () => clearTimeout(timer);
-      }
-    }, [autoPrint]);
 
     if (!invoice || !repairDetails) return null;
 
