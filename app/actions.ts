@@ -719,14 +719,14 @@ export async function getStatsAction() {
       _count: true,
     }),
     prisma.$queryRaw<{month: string; count: bigint}[]>`
-      SELECT TO_CHAR(createdAt, 'YYYY-MM') as month, COUNT(*)::bigint as count 
+      SELECT TO_CHAR("createdAt", 'YYYY-MM') as month, COUNT(*)::bigint as count 
       FROM "Repair" 
       GROUP BY month 
       ORDER BY month DESC 
       LIMIT 12
     `,
     prisma.$queryRaw<{month: string; total: number}[]>`
-      SELECT TO_CHAR(createdAt, 'YYYY-MM') as month, SUM("totalTtc")::float as total 
+      SELECT TO_CHAR("createdAt", 'YYYY-MM') as month, SUM("totalTtc")::float as total 
       FROM "Invoice" 
       GROUP BY month 
       ORDER BY month DESC 
