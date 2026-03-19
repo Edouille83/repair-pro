@@ -245,7 +245,7 @@ type StoreContextType = {
   updateClient: (id: number, data: any) => Promise<void>;
   getSetting: (key: string) => Promise<string | null>;
   setSetting: (key: string, value: string) => Promise<void>;
-  sendNotification: (repairId: number, type: "email" | "sms" | "both") => Promise<{ success: boolean; message: string }>;
+  sendNotification: (repairId: number, type: "email" | "sms" | "both", customEmail?: string) => Promise<{ success: boolean; message: string }>;
 };
 
 const StoreContext = createContext<StoreContextType | null>(null);
@@ -521,8 +521,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     await setSettingAction(key, value);
   }, []);
 
-  const sendNotification = useCallback(async (repairId: number, type: "email" | "sms" | "both") => {
-    const result = await sendRepairNotificationAction(repairId, type);
+  const sendNotification = useCallback(async (repairId: number, type: "email" | "sms" | "both", customEmail?: string) => {
+    const result = await sendRepairNotificationAction(repairId, type, customEmail);
     await refreshNotifications();
     return result;
   }, [refreshNotifications]);

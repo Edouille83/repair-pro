@@ -925,7 +925,7 @@ export async function getPublicRepairByPhoneAction(phone: string) {
 }
 
 // --- SEND NOTIFICATIONS ---
-export async function sendRepairNotificationAction(repairId: number, type: "email" | "sms" | "both") {
+export async function sendRepairNotificationAction(repairId: number, type: "email" | "sms" | "both", customEmail?: string) {
   const repair = await prisma.repair.findUnique({
     where: { id: repairId },
     include: { client: true },
@@ -940,6 +940,7 @@ export async function sendRepairNotificationAction(repairId: number, type: "emai
   let smsSent = false;
   let emailError: string | undefined;
   let smsError: string | undefined;
+  const recipientEmail = customEmail || repair.client.email;
   
   const statusMessages: Record<string, { title: string; message: string }> = {
     "Diagnostic": {
@@ -976,7 +977,7 @@ export async function sendRepairNotificationAction(repairId: number, type: "emai
   }
   
   if (type === "email" || type === "both") {
-    if (repair.client.email) {
+    if (recipientEmail) {
       const { subject, html } = formatRepairStatusEmail(
         repair.client.name,
         repair.deviceType,
@@ -985,7 +986,7 @@ export async function sendRepairNotificationAction(repairId: number, type: "emai
         shopName,
         shopPhone
       );
-      const result = await sendEmail(repair.client.email, subject, html);
+      const result = await sendEmail(recipientEmail, subject, html);
       emailSent = result.success;
       if (!result.success) emailError = result.error;
     }
@@ -995,7 +996,7 @@ export async function sendRepairNotificationAction(repairId: number, type: "emai
     data: {
       type: "status_update",
       title: title,
-      message: `Notification envoyée par ${type}: ${repair.client.phone}${repair.client.email ? " / " + repair.client.email : ""}${emailError ? ` (Email: ${emailError})` : ""}${smsError ? ` (SMS: ${smsError})` : ""}`,
+      message: `Notification envoyée par ${type}: ${repair.client.phone}${recipientEmail ? " / " + recipientEmail : ""}${customEmail ? " (email personnalisé)" : ""}${emailError ? ` (Email: ${emailError})` : ""}${smsError ? ` (SMS: ${smsError})` : ""}`,
       repairId: repair.id,
       clientId: repair.client.id,
       sentAt: new Date(),

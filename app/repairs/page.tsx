@@ -74,6 +74,7 @@ export default function RepairsPage() {
   const [labelToPrint, setLabelToPrint] = useState<any>(null);
   const [showNotifMenu, setShowNotifMenu] = useState<number | null>(null);
   const [conditionReport, setConditionReport] = useState<any>(null);
+  const [customEmail, setCustomEmail] = useState<string>("");
   const ticketRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -104,8 +105,10 @@ export default function RepairsPage() {
   const handleSendNotification = async (repairId: number, type: "email" | "sms" | "both") => {
     try {
       const repair = records.find(r => r.id === repairId);
-      const result = await sendNotification(repairId, type);
+      const emailToUse = type === "email" || type === "both" ? customEmail : undefined;
+      const result = await sendNotification(repairId, type, emailToUse);
       setShowNotifMenu(null);
+      setCustomEmail("");
       
       const gender = detectGender(repair?.clientName || "");
       const firstName = (repair?.clientName || "").split(" ")[0];
@@ -203,16 +206,22 @@ export default function RepairsPage() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5 text-sm">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-5 text-sm">
                   <div>
                     <div className="text-slate-500 mb-1">Téléphone</div>
                     <div className="font-medium bg-white px-3 py-1.5 rounded-md border border-slate-100 inline-block">{record.phone}</div>
                   </div>
+                  {record.email && (
+                    <div>
+                      <div className="text-slate-500 mb-1">Email</div>
+                      <div className="font-medium bg-white px-3 py-1.5 rounded-md border border-slate-100 inline-block">{record.email}</div>
+                    </div>
+                  )}
                   <div>
                     <div className="text-slate-500 mb-1">Type</div>
                     <div className="font-medium bg-white px-3 py-1.5 rounded-md border border-slate-100 inline-block">{record.deviceType}</div>
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-2 lg:col-span-3">
                     <div className="text-slate-500 mb-1">Problème déclaré</div>
                     <div className="font-medium bg-white px-3 py-1.5 rounded-md border border-slate-100 line-clamp-2">{record.issue}</div>
                   </div>
@@ -366,6 +375,20 @@ export default function RepairsPage() {
 
                             <div className="text-xs text-slate-500 text-center mb-4">
                               Le message sera automatiquement adapté au statut de la réparation
+                            </div>
+
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-slate-600 mb-2">
+                                Adresse email (optionnel)
+                              </label>
+                              <input
+                                type="email"
+                                value={customEmail}
+                                onChange={(e) => setCustomEmail(e.target.value)}
+                                placeholder={record.email || "client@exemple.com"}
+                                className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 outline-none transition-all text-sm"
+                              />
+                              <p className="text-xs text-slate-400 mt-1">Laissez vide pour utiliser l'email du client</p>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3">

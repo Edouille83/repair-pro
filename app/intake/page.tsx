@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useStore } from "../store/StoreProvider";
-import { PenTool, Smartphone, User, Phone, AlertTriangle, Camera, Laptop, Gamepad2, Watch, Tablet, Shield, Printer, FileText } from "lucide-react";
+import { PenTool, Smartphone, User, Phone, AlertTriangle, Camera, Laptop, Gamepad2, Watch, Tablet, Shield, Printer, FileText, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DEVICE_CATEGORIES, DEVICE_DATA } from "../lib/devices";
 import AddressAutocomplete from "../components/AddressAutocomplete";
@@ -34,6 +34,7 @@ export default function IntakePage() {
   const [clientName, setClientName] = useState("");
   const [clientTitle, setClientTitle] = useState("Mr");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [deviceType, setDeviceType] = useState(DEVICE_CATEGORIES[0]);
   const [deviceBrand, setDeviceBrand] = useState("");
@@ -127,6 +128,7 @@ export default function IntakePage() {
       clientName: clientName.trim(),
       clientTitle: effectiveTitle,
       phone: phone.trim(),
+      email: email.trim(),
       address: address.trim(),
       deviceType,
       brandModel: finalBrandModel,
@@ -292,6 +294,21 @@ export default function IntakePage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Ex: 06 12 34 56 78"
+              className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-slate-400" />
+              Email (pour les notifications)
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Ex: client@email.com"
               className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all"
             />
           </div>
