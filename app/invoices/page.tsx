@@ -240,6 +240,7 @@ export default function InvoicesPage() {
           invoice={printingInvoice} 
           repairDetails={records.find(r => r.id === printingInvoice?.repairId) || null}
           shopInfo={shopInfo}
+          autoPrint={!!printingInvoice}
         />
       </div>
     </div>
