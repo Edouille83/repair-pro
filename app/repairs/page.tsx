@@ -1,7 +1,7 @@
 "use client";
 
 import { useStore, RepairStatus } from "../store/StoreProvider";
-import { Wrench, Clock, AlertCircle, CheckCircle, Printer, ShieldCheck, Bell, Mail, MessageSquare, X, Send, Smartphone, Tag, FileText, Shield } from "lucide-react";
+import { Wrench, Clock, AlertCircle, CheckCircle, Printer, ShieldCheck, Bell, Mail, X, Send, Smartphone, Tag, FileText, Shield } from "lucide-react";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -111,7 +111,7 @@ export default function RepairsPage() {
       const firstName = (repair?.clientName || "").split(" ")[0];
       const personalizedGreeting = gender ? `Bonjour ${gender}. ${firstName}` : `Bonjour ${firstName}`;
       
-      alert(`✓ Notification envoyée avec succès !\n\n${personalizedGreeting},\n\n${result.message}\n\nType d'envoi : ${type === "both" ? "SMS + Email" : type.toUpperCase()}`);
+      alert(`✓ Notification envoyée avec succès !\n\n${personalizedGreeting},\n\n${result.message}`);
     } catch (err) {
       alert("Erreur lors de l'envoi de la notification");
     }
@@ -368,17 +368,7 @@ export default function RepairsPage() {
                               Le message sera automatiquement adapté au statut de la réparation
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3">
-                              <button
-                                onClick={() => handleSendNotification(record.id, "sms")}
-                                className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all"
-                              >
-                                <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg">
-                                  <MessageSquare className="w-5 h-5" />
-                                </div>
-                                <span className="text-sm font-semibold text-blue-700">SMS</span>
-                                <span className="text-[10px] text-blue-500">Uniquement</span>
-                              </button>
+                            <div className="grid grid-cols-1 gap-3">
                               <button
                                 onClick={() => handleSendNotification(record.id, "email")}
                                 className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 hover:from-indigo-100 hover:to-indigo-200 transition-all"
@@ -386,18 +376,8 @@ export default function RepairsPage() {
                                 <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-lg">
                                   <Mail className="w-5 h-5" />
                                 </div>
-                                <span className="text-sm font-semibold text-indigo-700">Email</span>
-                                <span className="text-[10px] text-indigo-500">Uniquement</span>
-                              </button>
-                              <button
-                                onClick={() => handleSendNotification(record.id, "both")}
-                                className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all"
-                              >
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg">
-                                  <Send className="w-5 h-5" />
-                                </div>
-                                <span className="text-sm font-semibold text-purple-700">Les deux</span>
-                                <span className="text-[10px] text-purple-500">SMS + Email</span>
+                                <span className="text-sm font-semibold text-indigo-700">Envoyer Email</span>
+                                <span className="text-[10px] text-indigo-500">Notifier le client par email</span>
                               </button>
                             </div>
 
