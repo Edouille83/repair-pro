@@ -8,7 +8,7 @@ import React from "react";
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
-  const isPublic = pathname?.startsWith("/dossier") || pathname?.startsWith("/book");
+  const isPublic = pathname?.startsWith("/dossier") || pathname?.startsWith("/book") || pathname?.startsWith("/suivi");
 
   if (isPublic) {
     return <main className="min-h-screen bg-slate-50">{children}</main>;
