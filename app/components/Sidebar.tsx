@@ -16,7 +16,7 @@ export function Sidebar() {
   const handleLogout = async () => {
     setLoggingOut(true);
     await fetch("/api/logout", { method: "POST" });
-    router.push("/login");
+    window.location.href = "/login";
   };
 
   const links = [
