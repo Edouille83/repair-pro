@@ -57,6 +57,24 @@ export default function RemindersPage() {
     r.status === "En cours" && daysSince(r.createdAt) >= 14
   );
 
+  const sendBulkReminder = async (repairs: typeof records) => {
+    const notYetReminded = repairs.filter(r => !r.reminderSent);
+    
+    if (notYetReminded.length === 0) {
+      setToast({
+        show: true,
+        message: "Aucun rappel à envoyer",
+        subtext: "Tous les appareils ont déjà été notifiés ou récupérés."
+      });
+      setTimeout(() => setToast({ show: false, message: "" }), 3000);
+      return;
+    }
+    
+    for (const repair of notYetReminded) {
+      await handleSendReminder(repair.id);
+    }
+  };
+
   const handleSendReminder = async (repairId: number) => {
     const repair = records.find(r => r.id === repairId);
     if (!repair) return;
@@ -73,12 +91,6 @@ export default function RemindersPage() {
     
     await markReminderSent(repairId);
     setTimeout(() => setToast({ show: false, message: "" }), 4000);
-  };
-
-  const sendBulkReminder = async (repairs: typeof records) => {
-    for (const repair of repairs) {
-      await handleSendReminder(repair.id);
-    }
   };
 
   return (
