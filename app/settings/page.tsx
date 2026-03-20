@@ -239,12 +239,26 @@ export default function SettingsPage() {
             </div>
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
               <div className="text-sm font-medium text-red-600 mb-2">Zone dangereuse</div>
-              <p className="text-xs text-red-500 mb-3">Cette action est irréversible. Assurez-vous d'avoir une sauvegarde.</p>
-              <button onClick={() => {
-                if (confirm("Êtes-vous sûr de vouloir réinitialiser la base de données ? Toutes les données seront perdues.")) {
-                  alert("Pour réinitialiser : supprimez dev.db et lancez 'npx prisma db push'");
-                }
-              }} className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 text-sm flex items-center gap-2">
+              <p className="text-xs text-red-500 mb-3">Cette action est irréversible. Toutes les données seront supprimées.</p>
+              <button 
+                onClick={async () => {
+                  if (confirm("Êtes-vous sûr de vouloir réinitialiser la base de données ? Toutes les données seront perdues.")) {
+                    try {
+                      const res = await fetch("/api/reset-database", { method: "POST" });
+                      const data = await res.json();
+                      if (data.success) {
+                        alert("Base de données réinitialisée ! La page va se recharger.");
+                        window.location.reload();
+                      } else {
+                        alert("Erreur : " + (data.error || "Inconnu"));
+                      }
+                    } catch {
+                      alert("Erreur lors de la réinitialisation");
+                    }
+                  }
+                }} 
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 text-sm flex items-center gap-2"
+              >
                 <Trash2 className="w-4 h-4" />
                 Réinitialiser la base
               </button>
