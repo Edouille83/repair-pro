@@ -42,24 +42,34 @@ export function formatRepairStatusEmail(
   shopName: string,
   shopPhone: string
 ): { subject: string; html: string } {
-  const statusEmoji: Record<string, string> = {
-    "Diagnostic": "📋",
+  const firstName = clientName.split(" ")[0];
+  
+  const statusColors: Record<string, { bg: string; text: string; border: string }> = {
+    "Diagnostic": { bg: "#fef3c7", text: "#92400e", border: "#f59e0b" },
+    "En cours": { bg: "#dbeafe", text: "#1e40af", border: "#3b82f6" },
+    "Attente pièce": { bg: "#ede9fe", text: "#5b21b6", border: "#8b5cf6" },
+    "Terminée": { bg: "#d1fae5", text: "#065f46", border: "#10b981" },
+  };
+  const colors = statusColors[status] || { bg: "#f3f4f6", text: "#374151", border: "#6b7280" };
+
+  const statusIcons: Record<string, string> = {
+    "Diagnostic": "🔍",
     "En cours": "🔧",
     "Attente pièce": "📦",
     "Terminée": "✅",
   };
-  const emoji = statusEmoji[status] || "🔔";
+  const icon = statusIcons[status] || "📱";
 
-  const statusMessage: Record<string, string> = {
-    "Diagnostic": "votre appareil est en cours de diagnostic",
-    "En cours": "la réparation a commencé",
-    "Attente pièce": "nous attendons une pièce détachée",
-    "Terminée": "votre appareil est prêt !",
+  const statusMessages: Record<string, string> = {
+    "Diagnostic": "Votre appareil est actuellement en cours de diagnostic par notre équipe technique.",
+    "En cours": "Bonne nouvelle ! La réparation de votre appareil a commencée.",
+    "Attente pièce": "Nous attendons une pièce détachée pour finaliser la réparation.",
+    "Terminée": "Votre appareil est prêt ! Vous pouvez venir le récupérer.",
   };
-  const message = statusMessage[status] || "une mise à jour a été effectuée";
+  const message = statusMessages[status] || "Une mise à jour concernant votre réparation a été effectuée.";
 
   return {
-    subject: `${emoji} ${status} - ${shopName}`,
+    subject: `${icon} ${shopName} - Réparation ${status}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -67,36 +77,63 @@ export function formatRepairStatusEmail(
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
-        <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-          <h1 style="color: #1e293b; margin: 0 0 8px 0; font-size: 24px;">${shopName}</h1>
-          <p style="color: #64748b; margin: 0 0 24px 0;">Atelier de Réparation Premium</p>
+      <body style="margin: 0; padding: 20px; background-color: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
           
-          <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-            <h2 style="margin: 0 0 8px 0; font-size: 20px;">${emoji} Réparation ${status}</h2>
-            <p style="margin: 0; opacity: 0.9;">${message}</p>
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #3b82f6 100%); padding: 40px 32px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0 0 8px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">${shopName}</h1>
+            <p style="color: rgba(255,255,255,0.85); margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Atelier de Réparation</p>
           </div>
           
-          <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-            <p style="margin: 0 0 8px 0; color: #475569;"><strong>Client:</strong> ${clientName}</p>
-            <p style="margin: 0 0 8px 0; color: #475569;"><strong>Appareil:</strong> ${deviceType} ${brandModel}</p>
-            <p style="margin: 0; color: #475569;"><strong>Statut:</strong> <span style="color: #6366f1; font-weight: bold;">${status}</span></p>
+          <!-- Greeting -->
+          <div style="padding: 32px 32px 24px 32px;">
+            <h2 style="color: #1e3a5f; margin: 0 0 16px 0; font-size: 24px; font-weight: 600;">Bonjour ${firstName},</h2>
           </div>
           
-          <p style="color: #64748b; font-size: 14px; margin-bottom: 16px;">
-            Merci de votre confiance. N'hésitez pas à nous contacter pour toute question.
-          </p>
+          <!-- Status Card -->
+          <div style="padding: 0 32px 32px 32px;">
+            <div style="background: ${colors.bg}; border-left: 4px solid ${colors.border}; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 32px;">${icon}</span>
+                <div>
+                  <p style="margin: 0; color: ${colors.text}; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Statut de votre réparation</p>
+                  <p style="margin: 4px 0 0 0; color: ${colors.text}; font-size: 20px; font-weight: 700;">${status}</p>
+                </div>
+              </div>
+              <p style="margin: 0; color: ${colors.text}; font-size: 15px; line-height: 1.6;">${message}</p>
+            </div>
+            
+            <!-- Details Card -->
+            <div style="background: #f8fafc; border-radius: 12px; padding: 24px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 40%;">Appareil</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 600;">${deviceType}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Modèle</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-weight: 600;">${brandModel}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
           
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 24px;">
-            <p style="color: #64748b; font-size: 14px; margin: 0;">
-              <strong>${shopName}</strong><br>
-              ${shopPhone}
+          <!-- Footer -->
+          <div style="background: #1e3a5f; padding: 24px 32px; text-align: center;">
+            <p style="color: #ffffff; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">${shopName}</p>
+            <p style="color: rgba(255,255,255,0.7); margin: 0; font-size: 14px;">📞 ${shopPhone}</p>
+          </div>
+          
+          <!-- Disclaimer -->
+          <div style="padding: 16px 32px; background: #f1f5f9; text-align: center;">
+            <p style="color: #94a3b8; font-size: 11px; margin: 0; line-height: 1.6;">
+              Cet email a été envoyé automatiquement. Merci de ne pas y répondre directement.<br>
+              Pour toute question, contactez-nous au ${shopPhone}
             </p>
           </div>
+          
         </div>
-        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 24px;">
-          Cet email a été envoyé automatiquement. Merci de ne pas y répondre.
-        </p>
       </body>
       </html>
     `,
