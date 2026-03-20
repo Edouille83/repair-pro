@@ -9,8 +9,22 @@ function euro(value: number) {
 }
 
 function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
+  const date = parseFrenchDate(dateStr);
   return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function parseFrenchDate(dateStr: string): Date {
+  if (!dateStr) return new Date(0);
+  const parts = dateStr.split(/[\/\s:]/);
+  if (parts.length >= 3) {
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const hour = parts[3] ? parseInt(parts[3], 10) : 0;
+    const minute = parts[4] ? parseInt(parts[4], 10) : 0;
+    return new Date(year, month, day, hour, minute);
+  }
+  return new Date(dateStr);
 }
 
 export default function ReportsPage() {
@@ -25,14 +39,14 @@ export default function ReportsPage() {
     all: new Date(0),
   };
 
-  const filterDate = new Date(dateFilters[dateRange]);
+  const filterDate = dateFilters[dateRange];
 
-  const filteredInvoices = invoices.filter(inv => new Date(inv.createdAt) >= filterDate);
+  const filteredInvoices = invoices.filter(inv => parseFrenchDate(inv.createdAt) >= filterDate);
   const filteredPayments = payments.filter(pay => {
     const invoice = invoices.find(i => i.id === pay.invoiceId);
-    return invoice && new Date(invoice.createdAt) >= filterDate;
+    return invoice && parseFrenchDate(invoice.createdAt) >= filterDate;
   });
-  const filteredRepairs = records.filter(r => new Date(r.createdAt) >= filterDate);
+  const filteredRepairs = records.filter(r => parseFrenchDate(r.createdAt) >= filterDate);
 
   const totalRevenue = filteredInvoices.reduce((sum, inv) => sum + inv.totalTtc, 0);
   const totalPaid = filteredPayments.reduce((sum, pay) => sum + pay.amount, 0);
@@ -55,8 +69,8 @@ export default function ReportsPage() {
   const completedRepairs = records.filter(r => r.status === "Terminée");
   const avgRepairTime = completedRepairs.length > 0
     ? Math.round(completedRepairs.reduce((sum, r) => {
-        const created = new Date(r.createdAt).getTime();
-        const completed = r.completedAt ? new Date(r.completedAt).getTime() : Date.now();
+        const created = parseFrenchDate(r.createdAt).getTime();
+        const completed = r.completedAt ? parseFrenchDate(r.completedAt).getTime() : Date.now();
         if (isNaN(created) || isNaN(completed)) return sum;
         return sum + (completed - created);
       }, 0) / completedRepairs.length / (1000 * 60 * 60 * 24))
@@ -66,7 +80,8 @@ export default function ReportsPage() {
   const lowStockParts = parts.filter(p => p.isLowStock).length;
 
   const monthlyRevenue = filteredInvoices.reduce((acc, inv) => {
-    const month = inv.createdAt.substring(0, 7);
+    const date = parseFrenchDate(inv.createdAt);
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     acc[month] = (acc[month] || 0) + inv.totalTtc;
     return acc;
   }, {} as Record<string, number>);
