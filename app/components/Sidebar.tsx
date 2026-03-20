@@ -7,7 +7,11 @@ import clsx from "clsx";
 import { useStore } from "../store/StoreProvider";
 import { useState } from "react";
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { unreadCount, unretrievedRepairs } = useStore();
@@ -17,6 +21,10 @@ export function Sidebar() {
     setLoggingOut(true);
     await fetch("/api/logout", { method: "POST" });
     window.location.href = "/login";
+  };
+
+  const handleLinkClick = () => {
+    if (onNavigate) onNavigate();
   };
 
   const links = [
@@ -42,7 +50,7 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white h-screen sticky top-0 flex flex-col overflow-y-auto">
+    <div className="flex flex-col h-full">
       <div className="p-6">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent mb-1">
           Repair Pro
@@ -53,6 +61,7 @@ export function Sidebar() {
       <nav className="flex flex-col gap-1 px-3 flex-1">
         <Link
           href="/"
+          onClick={handleLinkClick}
           className={clsx(
             "flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200",
             pathname === "/" 
@@ -76,6 +85,7 @@ export function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={handleLinkClick}
               className={clsx(
                 "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
                 isActive 
@@ -122,6 +132,7 @@ export function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={handleLinkClick}
               className={clsx(
                 "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
                 isActive 
@@ -138,6 +149,7 @@ export function Sidebar() {
         <div className="mt-auto pt-4">
           <Link
             href="/notifications"
+            onClick={handleLinkClick}
             className={clsx(
               "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
               pathname === "/notifications"
@@ -157,6 +169,7 @@ export function Sidebar() {
           </Link>
           <Link
             href="/settings"
+            onClick={handleLinkClick}
             className={clsx(
               "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
               pathname === "/settings"
@@ -189,6 +202,6 @@ export function Sidebar() {
           {loggingOut ? "Déconnexion..." : "Déconnexion"}
         </button>
       </div>
-    </aside>
+    </div>
   );
 }
