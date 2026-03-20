@@ -319,7 +319,14 @@ export default function RepairsPage() {
                   ))}
                   <div className="relative ml-auto">
                     <button
-                      onClick={() => setShowNotifMenu(showNotifMenu === record.id ? null : record.id)}
+                      onClick={() => {
+                        if (showNotifMenu === record.id) {
+                          setShowNotifMenu(null);
+                        } else {
+                          setShowNotifMenu(record.id);
+                          setCustomEmail(record.email || "");
+                        }
+                      }}
                       className="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 flex items-center gap-2 shadow-lg shadow-indigo-200"
                     >
                       <Bell className="w-4 h-4" />
