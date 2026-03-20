@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useStore } from "../store/StoreProvider";
-import { Settings as SettingsIcon, Building, Mail, Phone, MapPin, Save, Database, Trash2, Lock, Bell } from "lucide-react";
+import { Settings as SettingsIcon, Building, Mail, Phone, MapPin, Save, Database, Trash2, Lock, Bell, Download, Loader2 } from "lucide-react";
 
 export default function SettingsPage() {
   const { getSetting, setSetting } = useStore();
+  const [exporting, setExporting] = useState(false);
   const [settings, setSettings] = useState({
     shopName: "Repair Pro",
     shopAddress: "",
@@ -192,10 +193,48 @@ export default function SettingsPage() {
             <div className="p-4 bg-slate-50 rounded-lg">
               <div className="text-sm font-medium text-slate-600 mb-2">Export de données</div>
               <p className="text-xs text-slate-500 mb-3">Téléchargez une sauvegarde complète de vos données au format CSV.</p>
-              <button onClick={() => {
-                alert("Fonctionnalité à venir : export complet des données.");
-              }} className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg font-medium hover:bg-indigo-200 text-sm">
-                Exporter les données
+              <button 
+                onClick={async () => {
+                  setExporting(true);
+                  try {
+                    const res = await fetch("/api/export");
+                    const data = await res.json();
+                    if (data.success && data.data) {
+                      const timestamp = new Date().toISOString().split("T")[0];
+                      for (const [name, content] of Object.entries(data.data)) {
+                        const blob = new Blob([content as string], { type: "text/csv;charset=utf-8;" });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `repairpro_${name}_${timestamp}.csv`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                      }
+                    } else {
+                      alert("Erreur lors de l'export: " + (data.error || "Inconnu"));
+                    }
+                  } catch {
+                    alert("Erreur lors de l'export");
+                  } finally {
+                    setExporting(false);
+                  }
+                }} 
+                disabled={exporting}
+                className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg font-medium hover:bg-indigo-200 text-sm flex items-center gap-2 disabled:opacity-50"
+              >
+                {exporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Export en cours...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    Exporter les données
+                  </>
+                )}
               </button>
             </div>
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
