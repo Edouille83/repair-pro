@@ -20,9 +20,22 @@ function daysSince(dateStr: string): number {
 }
 
 export default function RemindersPage() {
-  const { records, sendNotification, markReminderSent } = useStore();
+  const { records, sendNotification, markReminderSent, getSetting } = useStore();
   const [autoReminders, setAutoReminders] = useState(true);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
+  const [toast, setToast] = useState<{ show: boolean; message: string; subtext?: string }>({ show: false, message: "" });
+  const [shopName, setShopName] = useState("Repair Pro");
+  const [shopPhone, setShopPhone] = useState("");
+  
+  useEffect(() => {
+    const loadShopInfo = async () => {
+      const name = await getSetting("shopName");
+      const phone = await getSetting("shopPhone");
+      if (name) setShopName(name);
+      if (phone) setShopPhone(phone);
+    };
+    loadShopInfo();
+  }, [getSetting]);
 
   const completedNotRetrieved = records.filter(r => 
     r.status === "Terminée" && !r.retrievedAt
@@ -48,14 +61,18 @@ export default function RemindersPage() {
     const repair = records.find(r => r.id === repairId);
     if (!repair) return;
 
-    const gender = detectGender(repair.clientName);
     const firstName = repair.clientName.split(" ")[0];
-    const greeting = gender ? `${gender}. ${firstName}` : firstName;
-
-    const result = await sendNotification(repairId, "sms");
     
-    alert(`Rappel envoyé à ${greeting}!\n\n${result.message}`);
+    await sendNotification(repairId, "email");
+    
+    setToast({
+      show: true,
+      message: `Rappel envoyé à ${firstName}`,
+      subtext: `Votre ${repair.deviceType} est prêt à être récupéré.`
+    });
+    
     await markReminderSent(repairId);
+    setTimeout(() => setToast({ show: false, message: "" }), 4000);
   };
 
   const sendBulkReminder = async (repairs: typeof records) => {
@@ -264,6 +281,26 @@ export default function RemindersPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-6 rounded-2xl shadow-2xl shadow-amber-500/30 min-w-[400px] text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Bell className="w-6 h-6" />
+              </div>
+              <span className="text-xl font-bold">Rappel envoyé</span>
+            </div>
+            <p className="text-white/90 text-lg font-semibold mb-1">{toast.message}</p>
+            <p className="text-white/80 text-sm mb-4">{toast.subtext}</p>
+            <div className="border-t border-white/20 pt-3 mt-2">
+              <p className="text-white font-bold">{shopName}</p>
+              <p className="text-white/70 text-sm">{shopPhone}</p>
+            </div>
           </div>
         </div>
       )}
