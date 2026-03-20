@@ -18,6 +18,9 @@ export default function InvoicesPage() {
   const [error, setError] = useReactState("");
   const [shopInfo, setShopInfo] = useState({ name: "Repair Pro", address: "", city: "", phone: "", siret: "", email: "" });
   
+  const repairIdsWithInvoices = invoices.map(inv => inv.repairId);
+  const availableRepairs = records.filter(r => !repairIdsWithInvoices.includes(r.id));
+  
   const [printingInvoice, setPrintingInvoice] = useReactState<Invoice | null>(null);
   const [emailInvoice, setEmailInvoice] = useReactState<Invoice | null>(null);
   const [clientEmail, setClientEmail] = useState("");
@@ -122,6 +125,8 @@ export default function InvoicesPage() {
     setLaborAmount("");
     setPartAmount("");
     setError("");
+    
+    document.querySelector("#invoices-archive")?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
@@ -153,9 +158,13 @@ export default function InvoicesPage() {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all appearance-none bg-slate-50"
               >
                 <option value="">Sélectionner une réparation...</option>
-                {records.map((r) => (
-                  <option key={r.id} value={r.id}>{r.clientName} — {r.brandModel}</option>
-                ))}
+                {availableRepairs.length === 0 ? (
+                  <option value="" disabled>Aucune réparation disponible</option>
+                ) : (
+                  availableRepairs.map((r) => (
+                    <option key={r.id} value={r.id}>{r.clientName} — {r.brandModel}</option>
+                  ))
+                )}
               </select>
             </div>
 
@@ -216,7 +225,7 @@ export default function InvoicesPage() {
         </div>
 
         {/* INVOICES LIST */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div id="invoices-archive" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
             <Search className="w-5 h-5 text-slate-400" />
             Archive des factures
