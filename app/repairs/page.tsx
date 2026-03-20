@@ -1,9 +1,9 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useStore, RepairStatus } from "../store/StoreProvider";
 import { Wrench, Clock, AlertCircle, CheckCircle, Printer, ShieldCheck, Bell, Mail, X, Send, Smartphone, Tag, FileText, Shield } from "lucide-react";
 import clsx from "clsx";
-import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { TicketPrint } from "../components/TicketPrint";
 import { DeviceLabel } from "../components/DeviceLabel";
@@ -69,12 +69,26 @@ const CHECKLIST_CONFIG: Record<string, { key: string; label: string }[]> = {
 };
 
 export default function RepairsPage() {
-  const { records, updateRecordStatus, sendNotification } = useStore();
+  const { records, updateRecordStatus, sendNotification, getSetting } = useStore();
   const [ticketToPrint, setTicketToPrint] = useState<any>(null);
   const [labelToPrint, setLabelToPrint] = useState<any>(null);
   const [showNotifMenu, setShowNotifMenu] = useState<number | null>(null);
   const [conditionReport, setConditionReport] = useState<any>(null);
   const [customEmail, setCustomEmail] = useState<string>("");
+  const [toast, setToast] = useState<{ show: boolean; message: string; subtext?: string }>({ show: false, message: "" });
+  const [shopName, setShopName] = useState("Repair Pro");
+  const [shopPhone, setShopPhone] = useState("");
+  
+  useEffect(() => {
+    const loadShopInfo = async () => {
+      const name = await getSetting("shopName");
+      const phone = await getSetting("shopPhone");
+      if (name) setShopName(name);
+      if (phone) setShopPhone(phone);
+    };
+    loadShopInfo();
+  }, [getSetting]);
+  
   const ticketRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -111,8 +125,16 @@ export default function RepairsPage() {
       setCustomEmail("");
       
       const firstName = (repair?.clientName || "").split(" ")[0];
+      const shopName = await getSetting("shopName") || "Repair Pro";
+      const shopPhone = await getSetting("shopPhone") || "";
       
-      alert(`✓ Notification envoyée avec succès !\n\nBonjour ${firstName},\n\nVotre ${repair?.deviceType || "appareil"} est maintenant au statut "${repair?.status}".\n\nNous vous tiendrons informé(e) de la suite.\n\n📞 ${repair?.phone || ""}`);
+      setToast({
+        show: true,
+        message: `Bonjour ${firstName}`,
+        subtext: `Votre ${repair?.deviceType || "appareil"} est maintenant au statut "${repair?.status}".`
+      });
+      
+      setTimeout(() => setToast({ show: false, message: "" }), 4000);
     } catch (err) {
       alert("Erreur lors de l'envoi de la notification");
     }
@@ -633,6 +655,26 @@ export default function RepairsPage() {
           </div>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-6 rounded-2xl shadow-2xl shadow-indigo-500/30 min-w-[400px] text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6" />
+              </div>
+              <span className="text-xl font-bold">Notification envoyée</span>
+            </div>
+            <p className="text-white/90 text-lg font-semibold mb-1">{toast.message}</p>
+            <p className="text-white/80 text-sm mb-4">{toast.subtext}</p>
+            <div className="border-t border-white/20 pt-3 mt-2">
+              <p className="text-white font-bold">{shopName}</p>
+              <p className="text-white/70 text-sm">{shopPhone}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
