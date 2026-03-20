@@ -178,7 +178,7 @@ export default function RepairsPage() {
           </div>
         ) : (
           <div className="grid gap-4">
-            {records.map((record) => (
+            {records.filter(r => !r.retrievedAt).map((record) => (
               <div key={record.id} className="p-5 rounded-xl border border-slate-100 bg-slate-50 hover:border-indigo-100 hover:bg-white transition-all shadow-sm">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -231,11 +231,16 @@ export default function RepairsPage() {
                           await markRepairRetrieved(record.id);
                         }
                       }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-bold transition-all border border-green-700"
+                      className={clsx(
+                        "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                        record.retrievedAt 
+                          ? "bg-green-700 hover:bg-green-800 text-white border-green-800" 
+                          : "bg-green-100 hover:bg-green-200 text-green-700 border-green-300"
+                      )}
                       title="Confirmer la récupération par le client"
                     >
                       <CheckCircle className="w-3.5 h-3.5" />
-                      Récupéré
+                      {record.retrievedAt ? "Récupéré" : "À récupérer"}
                     </button>
                   )}
                 </div>
