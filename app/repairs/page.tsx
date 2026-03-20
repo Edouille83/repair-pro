@@ -69,7 +69,7 @@ const CHECKLIST_CONFIG: Record<string, { key: string; label: string }[]> = {
 };
 
 export default function RepairsPage() {
-  const { records, updateRecordStatus, sendNotification, getSetting } = useStore();
+  const { records, updateRecordStatus, sendNotification, getSetting, markRepairRetrieved, getInvoicePaidTotal } = useStore();
   const [ticketToPrint, setTicketToPrint] = useState<any>(null);
   const [labelToPrint, setLabelToPrint] = useState<any>(null);
   const [showNotifMenu, setShowNotifMenu] = useState<number | null>(null);
@@ -224,6 +224,20 @@ export default function RepairsPage() {
                     <Shield className="w-3.5 h-3.5" />
                     Rapport
                   </button>
+                  {record.status === "Terminée" && (
+                    <button
+                      onClick={async () => {
+                        if (confirm(`Marquer "${record.brandModel}" comme récupéré par ${record.clientName} ?`)) {
+                          await markRepairRetrieved(record.id);
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-bold transition-all border border-green-700"
+                      title="Confirmer la récupération par le client"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Récupéré
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-5 text-sm">
