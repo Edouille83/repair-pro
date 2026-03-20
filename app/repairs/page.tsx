@@ -110,11 +110,9 @@ export default function RepairsPage() {
       setShowNotifMenu(null);
       setCustomEmail("");
       
-      const gender = detectGender(repair?.clientName || "");
       const firstName = (repair?.clientName || "").split(" ")[0];
-      const personalizedGreeting = gender ? `Bonjour ${gender}. ${firstName}` : `Bonjour ${firstName}`;
       
-      alert(`✓ Notification envoyée avec succès !\n\n${personalizedGreeting},\n\n${result.message}`);
+      alert(`✓ Notification envoyée avec succès !\n\nBonjour ${firstName},\n\nVotre ${repair?.deviceType || "appareil"} est maintenant au statut "${repair?.status}".\n\nNous vous tiendrons informé(e) de la suite.\n\n📞 ${repair?.phone || ""}`);
     } catch (err) {
       alert("Erreur lors de l'envoi de la notification");
     }
