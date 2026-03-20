@@ -411,18 +411,12 @@ export default function RepairsPage() {
                               </button>
                             </div>
 
-                            <div className="mt-5 flex gap-3">
+                            <div className="mt-5 flex gap-3 justify-center">
                               <button
                                 onClick={() => setShowNotifMenu(null)}
-                                className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-all"
+                                className="px-8 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-all"
                               >
                                 Annuler
-                              </button>
-                              <button
-                                onClick={() => handleSendNotification(record.id, "both")}
-                                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
-                              >
-                                Envoyer
                               </button>
                             </div>
                           </div>
