@@ -9,8 +9,8 @@ export async function sendEmail(
   htmlContent: string
 ): Promise<{ success: boolean; error?: string }> {
   if (!resend) {
-    console.log(`[EMAIL DISABLED] → ${to}: ${subject}`);
-    return { success: true, error: "Email not configured" };
+    console.error(`[EMAIL DISABLED - Missing RESEND_API_KEY] → ${to}: ${subject}`);
+    return { success: false, error: "RESEND_API_KEY non configurée" };
   }
 
   try {

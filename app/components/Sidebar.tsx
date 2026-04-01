@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, PenTool, Wrench, FileText, CreditCard, Users, Package, FileSignature, UserCog, Tags, Shield, Bell, Settings, BarChart3, LogOut } from "lucide-react";
+import { LayoutDashboard, PenTool, Wrench, FileText, CreditCard, Users, Package, FileSignature, UserCog, Tags, Shield, Bell, Settings, BarChart3, LogOut, Key } from "lucide-react";
 import clsx from "clsx";
 import { useStore } from "../store/StoreProvider";
 import { useState } from "react";
@@ -35,6 +35,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     { name: "Clients", href: "/clients", icon: Users },
     { name: "Factures", href: "/invoices", icon: FileText },
     { name: "Paiements", href: "/payments", icon: CreditCard },
+    { name: "Clé & Soudure", href: "/auto-keys", icon: Key },
   ];
 
   const settingsLinks = [
