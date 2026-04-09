@@ -33,6 +33,8 @@ export default function AutoKeysPage() {
   const [tel, setTel] = useState("");
   const [email, setEmail] = useState("");
   const [adresse, setAdresse] = useState("");
+  const [adresseSuggestions, setAdresseSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // State Véhicule
   const [immat, setImmat] = useState("");
@@ -74,6 +76,23 @@ export default function AutoKeysPage() {
     if (v.length > 5) v = v.slice(0, 2) + "-" + v.slice(2, 5) + "-" + v.slice(5, 7);
     else if (v.length > 2) v = v.slice(0, 2) + "-" + v.slice(2);
     setImmat(v);
+  };
+
+  const fetchAddressSuggestions = async (query: string) => {
+    if (query.length < 3) {
+      setAdresseSuggestions([]);
+      return;
+    }
+    try {
+      // Coordonnées de Toulon pour privilégier cette zone
+      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&lat=43.1242&lon=5.928&limit=5&autocomplete=1`);
+      const data = await res.json();
+      if (data.features) {
+        setAdresseSuggestions(data.features);
+      }
+    } catch (e) {
+      console.error("Erreur auto-complétion", e);
+    }
   };
 
   const addLibre = () => {
@@ -259,9 +278,37 @@ export default function AutoKeysPage() {
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@..." className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-slate-700 mb-1">Lieu d'intervention</label>
-              <input type="text" value={adresse} onChange={e => setAdresse(e.target.value)} placeholder="Adresse, Ville" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+              <input 
+                type="text" 
+                value={adresse} 
+                onChange={e => {
+                  setAdresse(e.target.value);
+                  setShowSuggestions(true);
+                  fetchAddressSuggestions(e.target.value);
+                }} 
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                placeholder="Adresse, Ville" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+              />
+              {showSuggestions && adresseSuggestions.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+                  {adresseSuggestions.map((s, idx) => (
+                    <li 
+                      key={idx} 
+                      onClick={() => {
+                        setAdresse(s.properties.label);
+                        setShowSuggestions(false);
+                      }}
+                      className="px-3 py-2.5 text-sm hover:bg-blue-50 cursor-pointer border-b last:border-b-0 border-slate-100 flex flex-col"
+                    >
+                      <span className="font-medium text-slate-800">{s.properties.name}</span>
+                      <span className="text-xs text-slate-500">{s.properties.postcode} {s.properties.city}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
